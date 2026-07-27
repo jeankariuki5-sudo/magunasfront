@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* Switch dark mode from OS-preference to a manual .dark class on <html>,
+   so ThemeToggle can flip it on demand instead of only following the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Sampled straight from the Magunas logos */
+  --color-brand-green: #96C83A;
+  --color-brand-green-deep: #6E9A2C;
+  --color-brand-yellow: #FFCA06;
+  --color-brand-black: #0A0A0A;
+  --color-brand-cream: #EEF7DC;
+
+  --font-display: 'Baloo 2', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  margin: 0;
+}
