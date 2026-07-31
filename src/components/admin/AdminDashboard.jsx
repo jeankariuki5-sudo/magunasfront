@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
-import DashboardHeader from '../DashboardHeader'
+import DashboardLayout from '../DashboardLayout'
 import StatCard from '../StatCard'
 
 const AdminDashboard = () => {
@@ -24,29 +24,27 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-brand-cream dark:bg-brand-black flex items-center justify-center transition-colors">
-                <p className="text-brand-black/60 dark:text-white/60">Loading dashboard...</p>
-            </div>
+            <DashboardLayout>
+                <p className="text-muted">Loading dashboard...</p>
+            </DashboardLayout>
         )
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-brand-cream dark:bg-brand-black flex items-center justify-center transition-colors">
+            <DashboardLayout>
                 <p className="text-red-500">{error}</p>
-            </div>
+            </DashboardLayout>
         )
     }
 
     const { users, branches, orders, revenue, recent_orders, low_stock_products, recent_suspensions } = data
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-black transition-colors">
-            <DashboardHeader title="Admin Dashboard" />
-
-            <main className="px-6 md:px-12 py-8 max-w-6xl mx-auto">
+        <DashboardLayout title="Admin Dashboard">
+            <div className="max-w-6xl mx-auto">
                 {/* Users */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Users</h2>
+                <h2 className="section-title">Users</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                     <StatCard label="Customers" value={users.total_customers} />
                     <StatCard label="Branch Managers" value={users.total_branch_managers} />
@@ -54,7 +52,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Branches */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Branches</h2>
+                <h2 className="section-title">Branches</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                     <StatCard label="Total" value={branches.total} />
                     <StatCard label="Active" value={branches.active} accent />
@@ -62,7 +60,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Orders + Revenue */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Orders & Revenue</h2>
+                <h2 className="section-title">Orders & Revenue</h2>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                     <StatCard label="Total Orders" value={orders.total} />
                     <StatCard label="Pending" value={orders.pending} />
@@ -72,13 +70,13 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Recent orders */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Recent Orders</h2>
-                <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden mb-8">
+                <h2 className="section-title">Recent Orders</h2>
+                <div className="card-table mb-8">
                     {recent_orders.length === 0 ? (
                         <p className="p-5 text-sm text-brand-black/50 dark:text-white/50">No orders yet.</p>
                     ) : (
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-brand-black/5 dark:bg-white/5 text-brand-black/60 dark:text-white/60">
+                            <thead className="table-head">
                                 <tr>
                                     <th className="px-4 py-3">Customer</th>
                                     <th className="px-4 py-3">Branch</th>
@@ -89,7 +87,7 @@ const AdminDashboard = () => {
                             </thead>
                             <tbody>
                                 {recent_orders.map((order) => (
-                                    <tr key={order.id} className="border-t border-brand-black/5 dark:border-white/5">
+                                    <tr key={order.id} className="table-row">
                                         <td className="px-4 py-3 text-brand-black dark:text-white">{order.customer}</td>
                                         <td className="px-4 py-3 text-brand-black/70 dark:text-white/70">{order.branch}</td>
                                         <td className="px-4 py-3 capitalize text-brand-black/70 dark:text-white/70">{order.status}</td>
@@ -105,13 +103,13 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Low stock */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Low Stock Products</h2>
-                <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden mb-8">
+                <h2 className="section-title">Low Stock Products</h2>
+                <div className="card-table mb-8">
                     {low_stock_products.length === 0 ? (
                         <p className="p-5 text-sm text-brand-black/50 dark:text-white/50">Nothing running low.</p>
                     ) : (
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-brand-black/5 dark:bg-white/5 text-brand-black/60 dark:text-white/60">
+                            <thead className="table-head">
                                 <tr>
                                     <th className="px-4 py-3">Product</th>
                                     <th className="px-4 py-3">Branch</th>
@@ -121,7 +119,7 @@ const AdminDashboard = () => {
                             </thead>
                             <tbody>
                                 {low_stock_products.map((p, i) => (
-                                    <tr key={i} className="border-t border-brand-black/5 dark:border-white/5">
+                                    <tr key={i} className="table-row">
                                         <td className="px-4 py-3 text-brand-black dark:text-white">{p.product}</td>
                                         <td className="px-4 py-3 text-brand-black/70 dark:text-white/70">{p.branch}</td>
                                         <td className="px-4 py-3 text-red-500 font-semibold">{p.stock_quantity}</td>
@@ -134,13 +132,13 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Recent suspensions */}
-                <h2 className="font-display font-semibold text-brand-black dark:text-white mb-3">Recent Suspensions</h2>
-                <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden">
+                <h2 className="section-title">Recent Suspensions</h2>
+                <div className="card-table">
                     {recent_suspensions.length === 0 ? (
                         <p className="p-5 text-sm text-brand-black/50 dark:text-white/50">No suspensions.</p>
                     ) : (
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-brand-black/5 dark:bg-white/5 text-brand-black/60 dark:text-white/60">
+                            <thead className="table-head">
                                 <tr>
                                     <th className="px-4 py-3">User</th>
                                     <th className="px-4 py-3">Type</th>
@@ -151,7 +149,7 @@ const AdminDashboard = () => {
                             </thead>
                             <tbody>
                                 {recent_suspensions.map((s, i) => (
-                                    <tr key={i} className="border-t border-brand-black/5 dark:border-white/5">
+                                    <tr key={i} className="table-row">
                                         <td className="px-4 py-3 text-brand-black dark:text-white">{s.user}</td>
                                         <td className="px-4 py-3 capitalize text-brand-black/70 dark:text-white/70">{s.suspension_type}</td>
                                         <td className="px-4 py-3 text-brand-black/70 dark:text-white/70">{s.reason}</td>
@@ -165,8 +163,8 @@ const AdminDashboard = () => {
                         </table>
                     )}
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
 

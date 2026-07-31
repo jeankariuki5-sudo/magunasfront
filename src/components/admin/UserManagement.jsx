@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
-import DashboardHeader from '../DashboardHeader'
+import DashboardLayout from '../DashboardLayout'
 
 const roleFilters = [
     { label: 'All', value: '' },
@@ -61,28 +61,26 @@ const UserManagement = () => {
     }
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-black transition-colors">
-            <DashboardHeader title="User Management" />
-
-            <main className="px-6 md:px-12 py-8 max-w-4xl mx-auto">
+        <DashboardLayout title="User Management">
+            <div className="max-w-4xl mx-auto">
                 <div className="flex gap-2 mb-4 flex-wrap">
                     {roleFilters.map((r) => (
                         <button
                             key={r.value || 'all'}
                             onClick={() => setRoleFilter(r.value)}
-                            className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${roleFilter === r.value ? 'bg-brand-green text-brand-black' : 'bg-white dark:bg-white/5 text-brand-black/60 dark:text-white/60'}`}
+                            className={roleFilter === r.value ? 'filter-pill-active' : 'filter-pill-inactive'}
                         >
                             {r.label}
                         </button>
                     ))}
                 </div>
 
-                {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+                {error && <div className="alert-error mb-3">{error}</div>}
 
                 {loading ? (
-                    <p className="text-sm text-brand-black/60 dark:text-white/60">Loading users...</p>
+                    <p className="text-sm text-muted">Loading users...</p>
                 ) : (
-                    <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden">
+                    <div className="card-table">
                         {users.map((u) => (
                             <div key={u.id} className="border-t first:border-t-0 border-brand-black/5 dark:border-white/5">
                                 <div className="flex items-center justify-between px-4 py-3">
@@ -93,20 +91,20 @@ const UserManagement = () => {
                                         <p className="text-xs text-brand-black/50 dark:text-white/50">{u.email} · {u.phone_number}</p>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.is_active ? 'bg-brand-green/15 text-brand-green-deep' : 'bg-red-100 text-red-600'}`}>
+                                        <span className={u.is_active ? 'badge-active' : 'badge-inactive'}>
                                             {u.is_active ? 'Active' : 'Suspended'}
                                         </span>
                                         {u.is_active ? (
                                             <button
                                                 onClick={() => setExpandedId(expandedId === u.id ? null : u.id)}
-                                                className="text-xs font-semibold text-red-500 hover:underline"
+                                                className="btn-text-danger"
                                             >
                                                 Suspend
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={() => handleUnsuspend(u.id, u.suspension_type === 'permanent')}
-                                                className="text-xs font-semibold text-brand-green-deep dark:text-brand-green hover:underline"
+                                                className="btn-text-action"
                                             >
                                                 Unsuspend
                                             </button>
@@ -148,8 +146,8 @@ const UserManagement = () => {
                         ))}
                     </div>
                 )}
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
 

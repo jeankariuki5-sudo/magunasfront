@@ -29,17 +29,21 @@ const LandingPage = () => {
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <Link
             to="/shop"
-            className="px-8 py-3 rounded-full bg-brand-green text-brand-black font-display font-semibold hover:bg-brand-green-deep hover:text-white transition"
+            className="btn-pill"
           >
             Start Shopping
           </Link>
           <Link
-            to="/login"
-            className="px-8 py-3 rounded-full border-2 border-brand-black/15 dark:border-white/20 text-brand-black dark:text-white font-display font-semibold hover:border-brand-green transition"
+            to="/register"
+            className="btn-outline"
           >
-            Sign In
+            Create Account
           </Link>
         </div>
+
+        <Link to="/find-branch" className="mt-6 text-sm link-accent">
+          <i className="bi bi-geo-alt" /> Find your nearest branch
+        </Link>
       </main>
     </div>
   )

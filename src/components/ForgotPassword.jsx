@@ -29,8 +29,8 @@ const ForgotPassword = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-brand-cream dark:bg-brand-black px-4 transition-colors">
-            <form onSubmit={handleSubmit} className="bg-white dark:bg-white/5 dark:border dark:border-white/10 p-8 rounded-2xl shadow-sm w-full max-w-sm">
+        <div className="auth-page">
+            <form onSubmit={handleSubmit} className="auth-card">
                 <div className="flex justify-center mb-6">
                     <Logo size="sm" />
                 </div>
@@ -42,18 +42,18 @@ const ForgotPassword = () => {
                     Enter your email and we'll send you a one-time code to reset your password.
                 </p>
 
-                {message && <div className="mb-4 text-brand-green-deep bg-brand-green/15 p-2 rounded-lg text-sm text-center">{message}</div>}
-                {error && <div className="mb-4 text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-sm text-center">{error}</div>}
+                {message && <div className="alert-success mb-4">{message}</div>}
+                {error && <div className="alert-error mb-4">{error}</div>}
 
                 <input
                     type="email" placeholder="Email" required
-                    className="w-full px-4 py-3 mb-4 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                    className="input-field mb-4"
                     value={email} onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <button
                     type="submit" disabled={loading}
-                    className="w-full bg-brand-green text-brand-black font-display font-semibold p-3 rounded-lg hover:bg-brand-green-deep hover:text-white transition disabled:opacity-60"
+                    className="btn-primary-block"
                 >
                     {loading ? 'Sending...' : 'Send OTP'}
                 </button>
@@ -62,7 +62,7 @@ const ForgotPassword = () => {
                     <button
                         type="button"
                         onClick={() => navigate('/reset_password', { state: { email } })}
-                        className="text-brand-green-deep dark:text-brand-green font-semibold hover:underline"
+                        className="link-accent"
                     >
                         Already have a code?
                     </button>

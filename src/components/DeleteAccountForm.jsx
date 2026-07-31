@@ -48,7 +48,7 @@ const DeleteAccountForm = () => {
                 Enter your password to permanently delete your account.
             </p>
 
-            {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+            {error && <div className="alert-error mb-3">{error}</div>}
 
             <input
                 type="password" placeholder="Password" required
@@ -59,7 +59,7 @@ const DeleteAccountForm = () => {
             <div className="flex gap-3">
                 <button
                     type="submit" disabled={loading}
-                    className="bg-red-500 text-white font-display font-semibold px-5 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-60"
+                    className="btn-danger"
                 >
                     {loading ? 'Deleting...' : 'Confirm Delete'}
                 </button>

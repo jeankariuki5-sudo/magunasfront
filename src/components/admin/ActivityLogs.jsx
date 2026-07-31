@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
-import DashboardHeader from '../DashboardHeader'
+import DashboardLayout from '../DashboardLayout'
 import StatCard from '../StatCard'
 
 const ActivityLogs = () => {
@@ -15,7 +15,7 @@ const ActivityLogs = () => {
     const fetchAll = async () => {
         setLoading(true)
         try {
-            const res = await api.get('users/activity/')
+            const res = await api.get('accounts/users/activity/')
             setLogs(res.data)
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to load activity')
@@ -27,7 +27,7 @@ const ActivityLogs = () => {
     const fetchFailed = async () => {
         setLoading(true)
         try {
-            const res = await api.get('users/activity/failed_logins/')
+            const res = await api.get('accounts/users/activity/failed_logins/')
             setLogs(res.data)
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to load failed logins')
@@ -42,7 +42,7 @@ const ActivityLogs = () => {
         setError('')
         setLoading(true)
         try {
-            const res = await api.get(`users/activity/${userId}/`)
+            const res = await api.get(`accounts/users/activity/${userId}/`)
             setUserLookup(res.data)
         } catch (err) {
             setError(err.response?.data?.error || 'User not found')
@@ -60,10 +60,8 @@ const ActivityLogs = () => {
     }, [tab])
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-black transition-colors">
-            <DashboardHeader title="Activity Logs" />
-
-            <main className="px-6 md:px-12 py-8 max-w-3xl mx-auto">
+        <DashboardLayout title="Activity Logs">
+            <div className="max-w-3xl mx-auto">
                 <div className="flex gap-2 mb-4">
                     {[
                         { key: 'all', label: 'All Activity' },
@@ -80,14 +78,14 @@ const ActivityLogs = () => {
                     ))}
                 </div>
 
-                {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+                {error && <div className="alert-error mb-3">{error}</div>}
 
                 {tab === 'user' && (
                     <form onSubmit={lookupUser} className="flex gap-2 mb-5">
                         <input
                             type="number" placeholder="User ID" value={userId}
                             onChange={(e) => setUserId(e.target.value)}
-                            className="text-sm border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg px-3 py-2 outline-none"
+                            className="input-field-sm px-3 py-2"
                         />
                         <button type="submit" className="text-sm font-semibold bg-brand-green text-brand-black px-4 py-2 rounded-lg hover:bg-brand-green-deep hover:text-white transition">
                             Look Up
@@ -96,7 +94,7 @@ const ActivityLogs = () => {
                 )}
 
                 {loading ? (
-                    <p className="text-sm text-brand-black/60 dark:text-white/60">Loading...</p>
+                    <p className="text-sm text-muted">Loading...</p>
                 ) : tab === 'user' && userLookup ? (
                     <div>
                         <h2 className="font-display font-semibold text-brand-black dark:text-white mb-1">
@@ -118,17 +116,17 @@ const ActivityLogs = () => {
                 ) : (
                     <ActivityTable rows={logs} showUser={true} />
                 )}
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
 
 const ActivityTable = ({ rows, showUser }) => {
     if (rows.length === 0) return <p className="text-sm text-brand-black/50 dark:text-white/50">No activity found.</p>
     return (
-        <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden">
+        <div className="card-table">
             <table className="w-full text-sm text-left">
-                <thead className="bg-brand-black/5 dark:bg-white/5 text-brand-black/60 dark:text-white/60">
+                <thead className="table-head">
                     <tr>
                         {showUser && <th className="px-4 py-3">User</th>}
                         <th className="px-4 py-3">Action</th>
@@ -139,7 +137,7 @@ const ActivityTable = ({ rows, showUser }) => {
                 </thead>
                 <tbody>
                     {rows.map((log) => (
-                        <tr key={log.id} className="border-t border-brand-black/5 dark:border-white/5">
+                        <tr key={log.id} className="table-row">
                             {showUser && <td className="px-4 py-3 text-brand-black dark:text-white">{log.user}</td>}
                             <td className="px-4 py-3 capitalize text-brand-black/70 dark:text-white/70">{log.action.replace(/_/g, ' ')}</td>
                             <td className="px-4 py-3 text-brand-black/70 dark:text-white/70">{log.detail}</td>
@@ -156,9 +154,9 @@ const ActivityTable = ({ rows, showUser }) => {
 const FailedLoginsTable = ({ rows }) => {
     if (rows.length === 0) return <p className="text-sm text-brand-black/50 dark:text-white/50">No failed logins.</p>
     return (
-        <div className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden">
+        <div className="card-table">
             <table className="w-full text-sm text-left">
-                <thead className="bg-brand-black/5 dark:bg-white/5 text-brand-black/60 dark:text-white/60">
+                <thead className="table-head">
                     <tr>
                         <th className="px-4 py-3">Targeted Username</th>
                         <th className="px-4 py-3">Detail</th>
@@ -168,7 +166,7 @@ const FailedLoginsTable = ({ rows }) => {
                 </thead>
                 <tbody>
                     {rows.map((log) => (
-                        <tr key={log.id} className="border-t border-brand-black/5 dark:border-white/5">
+                        <tr key={log.id} className="table-row">
                             <td className="px-4 py-3 text-brand-black dark:text-white">{log.targeted_username}</td>
                             <td className="px-4 py-3 text-brand-black/70 dark:text-white/70">{log.detail}</td>
                             <td className="px-4 py-3 text-brand-black/50 dark:text-white/50">{log.ip_address}</td>

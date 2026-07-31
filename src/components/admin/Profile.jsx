@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import api from '../api/api'
 import { AuthContext } from '../context/AuthContext'
-import DashboardHeader from '../DashboardHeader'
 import ChangePasswordForm from '../ChangePasswordForm'
 import DeleteAccountForm from '../DeleteAccountForm'
 

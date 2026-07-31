@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import api from '../api/api'
-import DashboardHeader from '../DashboardHeader'
+import DashboardLayout from '../DashboardLayout'
 
 const ManagerSubmitFeedback = () => {
     const [form, setForm] = useState({ title: '', description: '', feedback_type: 'general' })
@@ -30,23 +30,21 @@ const ManagerSubmitFeedback = () => {
     }
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-black transition-colors">
-            <DashboardHeader title="Submit Feedback to Admin" />
-
-            <main className="px-6 md:px-12 py-8 max-w-xl mx-auto">
-                <form onSubmit={handleSubmit} className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl p-5">
-                    {success && <div className="mb-3 text-sm text-brand-green-deep bg-brand-green/15 p-2 rounded-lg text-center">{success}</div>}
-                    {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+        <DashboardLayout title="Submit Feedback to Admin">
+            <div className="max-w-xl mx-auto">
+                <form onSubmit={handleSubmit} className="card">
+                    {success && <div className="alert-success mb-3">{success}</div>}
+                    {error && <div className="alert-error mb-3">{error}</div>}
 
                     <input
                         type="text" name="title" placeholder="Title" required
-                        className="w-full px-4 py-3 mb-3 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                        className="input-field mb-3"
                         value={form.title} onChange={handleChange}
                     />
 
                     <select
                         name="feedback_type" value={form.feedback_type} onChange={handleChange}
-                        className="w-full px-4 py-3 mb-3 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                        className="input-field mb-3"
                     >
                         <option value="general" className="text-black">General</option>
                         <option value="order" className="text-black">Order</option>
@@ -62,13 +60,13 @@ const ManagerSubmitFeedback = () => {
 
                     <button
                         type="submit" disabled={loading}
-                        className="bg-brand-green text-brand-black font-display font-semibold px-5 py-2 rounded-lg hover:bg-brand-green-deep hover:text-white transition disabled:opacity-60"
+                        className="btn-primary"
                     >
                         {loading ? 'Submitting...' : 'Submit Feedback'}
                     </button>
                 </form>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
 

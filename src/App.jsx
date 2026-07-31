@@ -11,17 +11,27 @@ import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import NotAuthorised from './components/NotAuthorised'
 import NotFound from './components/NotFound'
+import NearestBranchFinder from './components/NearestBranchFinder'
+import Shop from './components/Shop'
 
 import AdminDashboard from './components/admin/AdminDashboard'
 import CreateBranchManager from './components/admin/CreateBranchManager'
+import BranchManagerList from './components/admin/BranchManagerList'
 import UserManagement from './components/admin/UserManagement'
 import AdminAllFeedback from './components/admin/AllFeedback'
 import ActivityLogs from './components/admin/ActivityLogs'
+import CreateBranch from './components/admin/CreateBranch'
+import BranchList from './components/admin/BranchList'
+import CategoryManager from './components/admin/CategoryManager'
+import ProductManager from './components/admin/ProductManager'
+import BranchProductManager from './components/admin/BranchProductManager'
 
 import BranchDashboard from './components/branchmanager/BranchDashboard'
 import BranchManagerProfile from './components/branchmanager/Profile'
 import ManagerSubmitFeedback from './components/branchmanager/ManagerSubmitFeedback'
 import BranchFeedback from './components/branchmanager/BranchFeedback'
+import DeliveryZones from './components/branchmanager/DeliveryZones'
+import MyBranchProducts from './components/branchmanager/MyBranchProducts'
 
 import CustomerDashboard from './components/customer/CustomerDashboard'
 import CustomerProfile from './components/customer/Profile'
@@ -41,6 +51,8 @@ function App() {
             <Route path='/forgot_password' element={<ForgotPassword />} />
             <Route path='/reset_password' element={<ResetPassword />} />
             <Route path='/not_authorised' element={<NotAuthorised />} />
+            <Route path='/find-branch' element={<NearestBranchFinder />} />
+            <Route path='/shop' element={<Shop />} />
 
             {/* Role-based dashboards, matching the roles Login.jsx redirects to */}
             <Route
@@ -77,12 +89,20 @@ function App() {
             <Route path='/branch-profile' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchManagerProfile /></ProtectedRoute>} />
             <Route path='/branch-feedback/submit' element={<ProtectedRoute allowedRoles={['branch_manager']}><ManagerSubmitFeedback /></ProtectedRoute>} />
             <Route path='/branch-feedback' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchFeedback /></ProtectedRoute>} />
+            <Route path='/branch-delivery-zones' element={<ProtectedRoute allowedRoles={['branch_manager']}><DeliveryZones /></ProtectedRoute>} />
+            <Route path='/branch-products' element={<ProtectedRoute allowedRoles={['branch_manager']}><MyBranchProducts /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path='/admin/users' element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
+            <Route path='/admin/branch-managers' element={<ProtectedRoute allowedRoles={['admin']}><BranchManagerList /></ProtectedRoute>} />
             <Route path='/admin/create-branch-manager' element={<ProtectedRoute allowedRoles={['admin']}><CreateBranchManager /></ProtectedRoute>} />
             <Route path='/admin/feedback' element={<ProtectedRoute allowedRoles={['admin']}><AdminAllFeedback /></ProtectedRoute>} />
             <Route path='/admin/activity' element={<ProtectedRoute allowedRoles={['admin']}><ActivityLogs /></ProtectedRoute>} />
+            <Route path='/admin/branches' element={<ProtectedRoute allowedRoles={['admin']}><BranchList /></ProtectedRoute>} />
+            <Route path='/admin/create-branch' element={<ProtectedRoute allowedRoles={['admin']}><CreateBranch /></ProtectedRoute>} />
+            <Route path='/admin/categories' element={<ProtectedRoute allowedRoles={['admin']}><CategoryManager /></ProtectedRoute>} />
+            <Route path='/admin/products' element={<ProtectedRoute allowedRoles={['admin']}><ProductManager /></ProtectedRoute>} />
+            <Route path='/admin/branch-products' element={<ProtectedRoute allowedRoles={['admin']}><BranchProductManager /></ProtectedRoute>} />
 
             <Route path='*' element={<NotFound />} />
           </Routes>

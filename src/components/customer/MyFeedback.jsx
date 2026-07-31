@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/api'
-import DashboardHeader from '../DashboardHeader'
+import DashboardLayout from '../DashboardLayout'
 
-const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-700',
-    reviewed: 'bg-blue-100 text-blue-700',
-    resolved: 'bg-brand-green/15 text-brand-green-deep',
+const statusBadge = {
+    pending: 'badge-pending',
+    reviewed: 'badge-reviewed',
+    resolved: 'badge-resolved',
 }
 
 const MyFeedback = () => {
@@ -58,32 +58,30 @@ const MyFeedback = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-brand-cream dark:bg-brand-black flex items-center justify-center transition-colors">
-                <p className="text-brand-black/60 dark:text-white/60">Loading feedback...</p>
-            </div>
+            <DashboardLayout>
+                <p className="text-muted">Loading feedback...</p>
+            </DashboardLayout>
         )
     }
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-black transition-colors">
-            <DashboardHeader title="My Feedback" />
-
-            <main className="px-6 md:px-12 py-8 max-w-2xl mx-auto">
+        <DashboardLayout title="My Feedback">
+            <div className="max-w-2xl mx-auto">
                 <div className="flex justify-between items-center mb-4">
-                    <p className="text-sm text-brand-black/60 dark:text-white/60">{feedback.length} submitted</p>
-                    <Link to="/feedback/submit" className="text-sm font-semibold text-brand-green-deep dark:text-brand-green hover:underline">
+                    <p className="text-sm text-muted">{feedback.length} submitted</p>
+                    <Link to="/feedback/submit" className="link-accent text-sm">
                         + New Feedback
                     </Link>
                 </div>
 
-                {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+                {error && <div className="alert-error mb-3">{error}</div>}
 
                 {feedback.length === 0 ? (
                     <p className="text-sm text-brand-black/50 dark:text-white/50">You haven't submitted any feedback yet.</p>
                 ) : (
                     <div className="space-y-3">
                         {feedback.map((f) => (
-                            <div key={f.id} className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl p-4">
+                            <div key={f.id} className="card p-4">
                                 {editingId === f.id ? (
                                     <div>
                                         <input
@@ -97,15 +95,15 @@ const MyFeedback = () => {
                                             className="w-full px-3 py-2 mb-2 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg outline-none resize-none"
                                         />
                                         <div className="flex gap-2">
-                                            <button onClick={() => handleUpdate(f.id)} className="text-sm font-semibold text-brand-green-deep dark:text-brand-green hover:underline">Save</button>
-                                            <button onClick={() => setEditingId(null)} className="text-sm text-brand-black/50 dark:text-white/50 hover:underline">Cancel</button>
+                                            <button onClick={() => handleUpdate(f.id)} className="link-accent text-sm">Save</button>
+                                            <button onClick={() => setEditingId(null)} className="link-muted text-sm">Cancel</button>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
                                         <div className="flex justify-between items-start mb-1">
                                             <h3 className="font-semibold text-brand-black dark:text-white">{f.title}</h3>
-                                            <span className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${statusColors[f.status]}`}>{f.status}</span>
+                                            <span className={statusBadge[f.status]}>{f.status}</span>
                                         </div>
                                         <p className="text-sm text-brand-black/70 dark:text-white/70 mb-2">{f.description}</p>
                                         <p className="text-xs text-brand-black/40 dark:text-white/40 mb-2">
@@ -113,8 +111,8 @@ const MyFeedback = () => {
                                         </p>
                                         {f.status === 'pending' && (
                                             <div className="flex gap-3">
-                                                <button onClick={() => startEdit(f)} className="text-xs font-semibold text-brand-green-deep dark:text-brand-green hover:underline">Edit</button>
-                                                <button onClick={() => handleDelete(f.id)} className="text-xs font-semibold text-red-500 hover:underline">Delete</button>
+                                                <button onClick={() => startEdit(f)} className="btn-text-action">Edit</button>
+                                                <button onClick={() => handleDelete(f.id)} className="btn-text-danger">Delete</button>
                                             </div>
                                         )}
                                     </>
@@ -123,8 +121,8 @@ const MyFeedback = () => {
                         ))}
                     </div>
                 )}
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
 

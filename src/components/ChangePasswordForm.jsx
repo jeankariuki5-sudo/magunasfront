@@ -2,7 +2,7 @@ import { useState } from 'react'
 import api from './api/api'
 
 // Same endpoint and rules for every role - IsAuthenticated only, not role-gated -
-// so this lives here rather than duplicated in customer/ and branch_manager/.
+// so this lives here rather than duplicated in customer/ and branchmanager/.
 const ChangePasswordForm = () => {
     const [form, setForm] = useState({ old_password: '', new_password: '', new_password2: '' })
     const [loading, setLoading] = useState(false)
@@ -31,31 +31,31 @@ const ChangePasswordForm = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl p-5">
+        <form onSubmit={handleSubmit} className="card">
             <h3 className="font-display font-semibold text-brand-black dark:text-white mb-4">Change Password</h3>
 
-            {success && <div className="mb-3 text-sm text-brand-green-deep bg-brand-green/15 p-2 rounded-lg text-center">{success}</div>}
-            {error && <div className="mb-3 text-sm text-red-600 bg-red-100 dark:bg-red-500/10 p-2 rounded-lg text-center">{error}</div>}
+            {success && <div className="alert-success mb-3">{success}</div>}
+            {error && <div className="alert-error mb-3">{error}</div>}
 
             <input
                 type="password" name="old_password" placeholder="Current password" required
-                className="w-full px-4 py-3 mb-3 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                className="input-field mb-3"
                 value={form.old_password} onChange={handleChange}
             />
             <input
                 type="password" name="new_password" placeholder="New password" required
-                className="w-full px-4 py-3 mb-3 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                className="input-field mb-3"
                 value={form.new_password} onChange={handleChange}
             />
             <input
                 type="password" name="new_password2" placeholder="Confirm new password" required
-                className="w-full px-4 py-3 mb-4 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition outline-none"
+                className="input-field mb-4"
                 value={form.new_password2} onChange={handleChange}
             />
 
             <button
                 type="submit" disabled={loading}
-                className="bg-brand-green text-brand-black font-display font-semibold px-5 py-2 rounded-lg hover:bg-brand-green-deep hover:text-white transition disabled:opacity-60"
+                className="btn-primary"
             >
                 {loading ? 'Updating...' : 'Update Password'}
             </button>
