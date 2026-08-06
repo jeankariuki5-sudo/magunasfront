@@ -22,8 +22,8 @@ const DashboardLayout = ({ title, children }) => {
             {mobileOpen && (
                 <div className="fixed inset-0 z-40 md:hidden">
                     <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-                    <div className="absolute left-0 top-0 bottom-0 bg-brand-cream dark:bg-brand-black">
-                        <Sidebar role={user?.role} />
+                    <div className="absolute left-0 top-0 bottom-0 bg-brand-cream dark:bg-brand-black" onClick={() => setMobileOpen(false)}>
+                        <Sidebar role={user?.role} variant="mobile" />
                     </div>
                 </div>
             )}
@@ -58,12 +58,14 @@ const DashboardLayout = ({ title, children }) => {
                             </div>
                         )}
                         <ThemeToggle />
-                        <button
-                            onClick={Logout}
-                            className="text-sm font-semibold text-red-500 hover:text-red-600 transition"
-                        >
-                            Log out
-                        </button>
+                        {user && (
+                            <button
+                                onClick={Logout}
+                                className="text-sm font-semibold text-red-500 hover:text-red-600 transition"
+                            >
+                                Log out
+                            </button>
+                        )}
                     </div>
                 </header>
 

@@ -3,6 +3,7 @@ import api from './api/api'
 import { AuthContext } from './context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import Logo from './Logo'
+import PasswordInput from './PasswordInput'
 
 const Login = () => {
 
@@ -87,7 +88,7 @@ const Login = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)} />
 
-                <input type="password"
+                <PasswordInput
                     placeholder='Password'
                     required
                     className="input-field mb-2"

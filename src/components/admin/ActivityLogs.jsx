@@ -9,8 +9,9 @@ const ActivityLogs = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    const [userId, setUserId] = useState('')
+    const [emailQuery, setEmailQuery] = useState('')
     const [userLookup, setUserLookup] = useState(null)
+    const [flagged, setFlagged] = useState([])
 
     const fetchAll = async () => {
         setLoading(true)
@@ -36,13 +37,37 @@ const ActivityLogs = () => {
         }
     }
 
+    const fetchFlagged = async () => {
+        setLoading(true)
+        try {
+            const res = await api.get('accounts/users/flagged/')
+            setFlagged(res.data)
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to load flagged accounts')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const lookupUser = async (e) => {
         e.preventDefault()
-        if (!userId) return
+        if (!emailQuery) return
         setError('')
         setLoading(true)
         try {
-            const res = await api.get(`accounts/users/activity/${userId}/`)
+            // There's no lookup-by-email endpoint on the backend, so this
+            // resolves the email to a user ID via list_users first, then
+            // calls the real by-ID endpoint transparently.
+            const usersRes = await api.get('accounts/auth/list_users/')
+            const match = usersRes.data.find(
+                (u) => u.email.toLowerCase() === emailQuery.trim().toLowerCase()
+            )
+            if (!match) {
+                setError('No user found with that email')
+                setUserLookup(null)
+                return
+            }
+            const res = await api.get(`accounts/users/activity/${match.id}/`)
             setUserLookup(res.data)
         } catch (err) {
             setError(err.response?.data?.error || 'User not found')
@@ -56,6 +81,7 @@ const ActivityLogs = () => {
         setError('')
         if (tab === 'all') fetchAll()
         else if (tab === 'failed') fetchFailed()
+        else if (tab === 'flagged') fetchFlagged()
         else setUserLookup(null)
     }, [tab])
 
@@ -66,6 +92,7 @@ const ActivityLogs = () => {
                     {[
                         { key: 'all', label: 'All Activity' },
                         { key: 'failed', label: 'Failed Logins' },
+                        { key: 'flagged', label: 'Flagged Accounts' },
                         { key: 'user', label: 'Look Up User' },
                     ].map((t) => (
                         <button
@@ -83,9 +110,9 @@ const ActivityLogs = () => {
                 {tab === 'user' && (
                     <form onSubmit={lookupUser} className="flex gap-2 mb-5">
                         <input
-                            type="number" placeholder="User ID" value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
-                            className="input-field-sm px-3 py-2"
+                            type="email" placeholder="User's email" value={emailQuery}
+                            onChange={(e) => setEmailQuery(e.target.value)}
+                            className="input-field-sm px-3 py-2 flex-1 max-w-xs"
                         />
                         <button type="submit" className="text-sm font-semibold bg-brand-green text-brand-black px-4 py-2 rounded-lg hover:bg-brand-green-deep hover:text-white transition">
                             Look Up
@@ -110,7 +137,9 @@ const ActivityLogs = () => {
                         <ActivityTable rows={userLookup.activity} showUser={false} />
                     </div>
                 ) : tab === 'user' ? (
-                    <p className="text-sm text-brand-black/50 dark:text-white/50">Enter a user ID to look up their activity.</p>
+                    <p className="text-sm text-brand-black/50 dark:text-white/50">Enter a user's email to look up their activity.</p>
+                ) : tab === 'flagged' ? (
+                    <FlaggedAccountsList rows={flagged} onActionTaken={fetchFlagged} />
                 ) : tab === 'failed' ? (
                     <FailedLoginsTable rows={logs} />
                 ) : (
@@ -175,6 +204,58 @@ const FailedLoginsTable = ({ rows }) => {
                     ))}
                 </tbody>
             </table>
+        </div>
+    )
+}
+
+const FlaggedAccountsList = ({ rows, onActionTaken }) => {
+    const [error, setError] = useState('')
+
+    const quickSuspend = async (user) => {
+        const reason = window.prompt(`Reason for suspending ${user.username}?`, 'Flagged for suspicious activity')
+        if (!reason) return
+        try {
+            await api.post(`accounts/auth/suspend_user/${user.id}/`, {
+                suspension_type: 'temporary',
+                reason,
+                lift_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h default
+            })
+            onActionTaken()
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to suspend user')
+        }
+    }
+
+    if (rows.length === 0) {
+        return <p className="text-sm text-brand-black/50 dark:text-white/50">No accounts currently flagged - nothing suspicious detected.</p>
+    }
+
+    return (
+        <div className="space-y-3">
+            {error && <div className="alert-error mb-3">{error}</div>}
+            {rows.map((u) => (
+                <div key={u.id} className="card">
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <p className="font-semibold text-brand-black dark:text-white">
+                                {u.username} <span className="text-xs font-normal text-faint capitalize">· {u.role}</span>
+                            </p>
+                            <p className="text-xs text-muted">{u.email}</p>
+                        </div>
+                        <span className={u.is_active ? 'badge-active' : 'badge-inactive'}>
+                            {u.is_active ? 'Active' : 'Suspended'}
+                        </span>
+                    </div>
+                    <ul className="text-sm text-red-500 mb-3 list-disc list-inside">
+                        {u.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                    {u.is_active && (
+                        <button onClick={() => quickSuspend(u)} className="btn-text-danger">
+                            Suspend this account
+                        </button>
+                    )}
+                </div>
+            ))}
         </div>
     )
 }

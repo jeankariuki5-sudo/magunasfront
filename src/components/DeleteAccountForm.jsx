@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
 import api from './api/api'
 import { AuthContext } from './context/AuthContext'
+import PasswordInput from './PasswordInput'
 
 const DeleteAccountForm = () => {
     const { Logout } = useContext(AuthContext)
@@ -50,9 +51,9 @@ const DeleteAccountForm = () => {
 
             {error && <div className="alert-error mb-3">{error}</div>}
 
-            <input
-                type="password" placeholder="Password" required
-                className="w-full px-4 py-3 mb-4 border border-brand-black/15 dark:border-white/15 bg-transparent dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition outline-none"
+            <PasswordInput
+                placeholder="Password" required
+                className="input-field mb-4 focus:ring-red-500 focus:border-red-500"
                 value={password} onChange={(e) => setPassword(e.target.value)}
             />
 

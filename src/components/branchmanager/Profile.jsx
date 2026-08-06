@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext'
 import DashboardLayout from '../DashboardLayout'
 import ChangePasswordForm from '../ChangePasswordForm'
 import DeleteAccountForm from '../DeleteAccountForm'
+import PhotoUpload from '../PhotoUpload'
 
 const Profile = () => {
     const { setUser } = useContext(AuthContext)
@@ -82,22 +83,8 @@ const Profile = () => {
                     {success && <div className="alert-success mb-3">{success}</div>}
                     {error && <div className="alert-error mb-3">{error}</div>}
 
-                    <div className="flex items-center gap-4 mb-4">
-                        {currentPicture ? (
-                            <img src={currentPicture} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-brand-black/10 dark:border-white/10" />
-                        ) : (
-                            <div className="w-16 h-16 rounded-full bg-brand-black/5 dark:bg-white/5 flex items-center justify-center text-faint">
-                                <i className="bi bi-person text-2xl" />
-                            </div>
-                        )}
-                        <label className="text-sm text-muted">
-                            Change photo
-                            <input
-                                type="file" accept="image/*"
-                                onChange={(e) => setPictureFile(e.target.files[0])}
-                                className="block mt-1 text-sm"
-                            />
-                        </label>
+                    <div className="mb-4">
+                        <PhotoUpload existingUrl={currentPicture} label="Profile picture" onChange={setPictureFile} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-3">

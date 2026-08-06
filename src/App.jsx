@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './App.css'
 import { AuthProvider } from './components/context/AuthContext'
+import { CartProvider } from './components/context/CartContext'
 import { ThemeProvider } from './components/context/ThemeContext'
 import ProtectedRoute from './components/context/ProtectedRoute'
 import LandingPage from './components/LandingPage'
@@ -32,11 +33,17 @@ import ManagerSubmitFeedback from './components/branchmanager/ManagerSubmitFeedb
 import BranchFeedback from './components/branchmanager/BranchFeedback'
 import DeliveryZones from './components/branchmanager/DeliveryZones'
 import MyBranchProducts from './components/branchmanager/MyBranchProducts'
+import BranchOrders from './components/branchmanager/BranchOrders'
 
 import CustomerDashboard from './components/customer/CustomerDashboard'
 import CustomerProfile from './components/customer/Profile'
 import SubmitFeedback from './components/customer/SubmitFeedback'
 import MyFeedback from './components/customer/MyFeedback'
+import Cart from './components/customer/Cart'
+import Checkout from './components/customer/Checkout'
+import MyOrders from './components/customer/MyOrders'
+
+import AllOrders from './components/admin/AllOrders'
 
 function App() {
   return (
@@ -44,6 +51,7 @@ function App() {
       {/* AuthProvider must live inside Router - it calls useNavigate internally */}
       <ThemeProvider>
         <AuthProvider>
+        <CartProvider>
           <Routes>
             <Route path='/' element={<LandingPage />} />
             <Route path='/login' element={<Login />} />
@@ -84,6 +92,9 @@ function App() {
             <Route path='/profile' element={<ProtectedRoute allowedRoles={['customer']}><CustomerProfile /></ProtectedRoute>} />
             <Route path='/feedback/submit' element={<ProtectedRoute allowedRoles={['customer']}><SubmitFeedback /></ProtectedRoute>} />
             <Route path='/feedback/my' element={<ProtectedRoute allowedRoles={['customer']}><MyFeedback /></ProtectedRoute>} />
+            <Route path='/cart' element={<ProtectedRoute allowedRoles={['customer']}><Cart /></ProtectedRoute>} />
+            <Route path='/checkout' element={<ProtectedRoute allowedRoles={['customer']}><Checkout /></ProtectedRoute>} />
+            <Route path='/orders/my' element={<ProtectedRoute allowedRoles={['customer']}><MyOrders /></ProtectedRoute>} />
 
             {/* Branch manager */}
             <Route path='/branch-profile' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchManagerProfile /></ProtectedRoute>} />
@@ -91,6 +102,7 @@ function App() {
             <Route path='/branch-feedback' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchFeedback /></ProtectedRoute>} />
             <Route path='/branch-delivery-zones' element={<ProtectedRoute allowedRoles={['branch_manager']}><DeliveryZones /></ProtectedRoute>} />
             <Route path='/branch-products' element={<ProtectedRoute allowedRoles={['branch_manager']}><MyBranchProducts /></ProtectedRoute>} />
+            <Route path='/branch-orders' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchOrders /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path='/admin/users' element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
@@ -103,9 +115,11 @@ function App() {
             <Route path='/admin/categories' element={<ProtectedRoute allowedRoles={['admin']}><CategoryManager /></ProtectedRoute>} />
             <Route path='/admin/products' element={<ProtectedRoute allowedRoles={['admin']}><ProductManager /></ProtectedRoute>} />
             <Route path='/admin/branch-products' element={<ProtectedRoute allowedRoles={['admin']}><BranchProductManager /></ProtectedRoute>} />
+            <Route path='/admin/orders' element={<ProtectedRoute allowedRoles={['admin']}><AllOrders /></ProtectedRoute>} />
 
             <Route path='*' element={<NotFound />} />
           </Routes>
+        </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </Router>

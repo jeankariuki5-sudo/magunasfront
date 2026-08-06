@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import api from './api/api'
+import PasswordInput from './PasswordInput'
 
 // Same endpoint and rules for every role - IsAuthenticated only, not role-gated -
 // so this lives here rather than duplicated in customer/ and branchmanager/.
@@ -37,18 +38,18 @@ const ChangePasswordForm = () => {
             {success && <div className="alert-success mb-3">{success}</div>}
             {error && <div className="alert-error mb-3">{error}</div>}
 
-            <input
-                type="password" name="old_password" placeholder="Current password" required
+            <PasswordInput
+                name="old_password" placeholder="Current password" required
                 className="input-field mb-3"
                 value={form.old_password} onChange={handleChange}
             />
-            <input
-                type="password" name="new_password" placeholder="New password" required
+            <PasswordInput
+                name="new_password" placeholder="New password" required
                 className="input-field mb-3"
                 value={form.new_password} onChange={handleChange}
             />
-            <input
-                type="password" name="new_password2" placeholder="Confirm new password" required
+            <PasswordInput
+                name="new_password2" placeholder="Confirm new password" required
                 className="input-field mb-4"
                 value={form.new_password2} onChange={handleChange}
             />

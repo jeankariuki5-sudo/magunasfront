@@ -4,6 +4,9 @@ import Logo from './Logo'
 const navByRole = {
     customer: [
         { to: '/customer-dashboard', label: 'Dashboard', icon: 'bi-grid' },
+        { to: '/shop', label: 'Shop', icon: 'bi-shop-window' },
+        { to: '/cart', label: 'Cart', icon: 'bi-cart3' },
+        { to: '/orders/my', label: 'My Orders', icon: 'bi-receipt' },
         { to: '/profile', label: 'Profile', icon: 'bi-person' },
         { to: '/feedback/my', label: 'My Feedback', icon: 'bi-chat-left-text' },
         { to: '/feedback/submit', label: 'Submit Feedback', icon: 'bi-pencil-square' },
@@ -12,6 +15,7 @@ const navByRole = {
         { to: '/branch-dashboard', label: 'Dashboard', icon: 'bi-grid' },
         { to: '/branch-profile', label: 'Profile', icon: 'bi-person' },
         { to: '/branch-products', label: 'My Products', icon: 'bi-box-seam' },
+        { to: '/branch-orders', label: 'Orders', icon: 'bi-receipt' },
         { to: '/branch-delivery-zones', label: 'Delivery Zones', icon: 'bi-geo-alt' },
         { to: '/branch-feedback', label: 'Branch Feedback', icon: 'bi-chat-left-text' },
         { to: '/branch-feedback/submit', label: 'Message Admin', icon: 'bi-send' },
@@ -26,17 +30,32 @@ const navByRole = {
         { to: '/admin/categories', label: 'Categories', icon: 'bi-tags' },
         { to: '/admin/products', label: 'Products', icon: 'bi-box-seam' },
         { to: '/admin/branch-products', label: 'Branch Inventory', icon: 'bi-boxes' },
+        { to: '/admin/orders', label: 'Orders', icon: 'bi-receipt' },
         { to: '/admin/feedback', label: 'Feedback', icon: 'bi-chat-left-text' },
         { to: '/admin/activity', label: 'Activity', icon: 'bi-clock-history' },
     ],
 }
 
-const Sidebar = ({ role }) => {
+const Sidebar = ({ role, variant = 'desktop' }) => {
     const location = useLocation()
     const nav = navByRole[role] || []
 
+    // 'desktop': hidden below md, shown as part of the normal layout above it.
+    // 'mobile': always shown - used inside DashboardLayout's slide-over drawer,
+    // which is itself only ever rendered below md in the first place.
+    const visibilityClass = variant === 'mobile' ? 'flex' : 'hidden md:flex'
+
+    // sticky + top-0 + h-screen pins the sidebar to the viewport as the page
+    // scrolls, instead of it being a normal in-flow flex child that scrolls
+    // away along with everything else. overflow-y-auto on the aside itself
+    // (not the page) means if the nav list is ever taller than the screen,
+    // only the sidebar scrolls internally - the rest of the layout doesn't.
+    // The mobile drawer copy fills its own fixed-position wrapper instead
+    // (h-full), since that wrapper is already pinned by DashboardLayout.
+    const positionClass = variant === 'mobile' ? 'h-full' : 'sticky top-0 h-screen'
+
     return (
-        <aside className="w-64 shrink-0 border-r border-brand-black/10 dark:border-white/10 min-h-screen hidden md:flex flex-col">
+        <aside className={`w-64 shrink-0 border-r border-brand-black/10 dark:border-white/10 ${positionClass} overflow-y-auto ${visibilityClass} flex-col`}>
             <div className="px-6 py-6">
                 <Logo size="sm" />
             </div>

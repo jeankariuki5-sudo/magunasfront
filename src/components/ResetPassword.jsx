@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import api from './api/api'
 import Logo from './Logo'
+import PasswordInput from './PasswordInput'
 
 const ResetPassword = () => {
     const location = useLocation()
@@ -59,14 +60,14 @@ const ResetPassword = () => {
                     value={form.otp} onChange={handleChange}
                 />
 
-                <input
-                    type="password" name="new_password" placeholder="New password" required
+                <PasswordInput
+                    name="new_password" placeholder="New password" required
                     className="input-field mb-3"
                     value={form.new_password} onChange={handleChange}
                 />
 
-                <input
-                    type="password" name="new_password2" placeholder="Confirm new password" required
+                <PasswordInput
+                    name="new_password2" placeholder="Confirm new password" required
                     className="input-field mb-4"
                     value={form.new_password2} onChange={handleChange}
                 />

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import DashboardLayout from '../DashboardLayout'
+import PasswordInput from '../PasswordInput'
+import PhotoUpload from '../PhotoUpload'
 
 const CreateBranchManagerPage = () => {
     const [form, setForm] = useState({
@@ -119,20 +121,18 @@ const CreateBranchManagerPage = () => {
                         value={form.national_id} onChange={handleChange}
                     />
 
-                    <input
-                        type="password" name="password" placeholder="Temporary password" required
+                    <PasswordInput
+                        name="password" placeholder="Temporary password" required
                         className="input-field mb-3"
                         value={form.password} onChange={handleChange}
                     />
 
-                    <label className="block text-sm text-muted mb-4">
+                    <label className="block text-sm text-muted mb-2">
                         Profile picture (optional)
-                        <input
-                            type="file" accept="image/*"
-                            onChange={(e) => setPictureFile(e.target.files[0])}
-                            className="block mt-1 text-sm"
-                        />
                     </label>
+                    <div className="mb-4">
+                        <PhotoUpload label="Profile picture" onChange={setPictureFile} />
+                    </div>
 
                     <label className="block text-sm text-brand-black/60 dark:text-white/60 mb-1">
                         Assign to branch (optional - can also be done later from Branch Managers)
