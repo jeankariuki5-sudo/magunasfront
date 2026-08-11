@@ -17,7 +17,7 @@ const NotAuthorised = () => {
                 <div className="w-16 h-1 bg-brand-yellow mx-auto my-4 rounded-full"></div>
                 <h2 className="text-2xl font-display font-bold text-brand-black dark:text-white mb-2">Access Denied</h2>
                 <p className="text-muted mb-2">You don't have permission to view this page</p>
-                <p className="text-muted text-lg mb-8">Unatry?🤨🤨🤨</p>
+                
 
                 <div className="flex items-center justify-center gap-3">
                     <button
@@ -28,7 +28,7 @@ const NotAuthorised = () => {
                     <button
                         onClick={() => navigate('/')}
                         className="btn-solid-sm">
-                        RUDI KWENU!!!😤😤
+                        Back to Home
                     </button>
                 </div>
             </div>
