@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import DashboardLayout from '../DashboardLayout'
+import ImageUpload from '../ImageUpload'
 
 const emptyForm = { product_name: '', description: '', category: '' }
 
@@ -143,12 +144,13 @@ const ProductManager = () => {
                             onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                             className="input-field mb-3 resize-none"
                         />
-                        <input
-                            type="file" accept="image/*"
-                            onChange={(e) => setNewImage(e.target.files[0])}
-                            className="block text-sm mb-3"
+                        <ImageUpload
+                            existingUrl={null}
+                            onChange={setNewImage}
+                            label="Product image"
+                            icon="bi-box-seam"
                         />
-                        <button type="submit" className="btn-primary">Create Product</button>
+                        <button type="submit" className="btn-primary mt-3">Create Product</button>
                     </form>
                 )}
 
@@ -181,10 +183,11 @@ const ProductManager = () => {
                                             onChange={(e) => setEditProduct({ ...editProduct, description: e.target.value })}
                                             className="input-field-sm w-full resize-none"
                                         />
-                                        <input
-                                            type="file" accept="image/*"
-                                            onChange={(e) => setEditImage(e.target.files[0])}
-                                            className="block text-sm"
+                                        <ImageUpload
+                                            existingUrl={p.image}
+                                            onChange={setEditImage}
+                                            label="Product image"
+                                            icon="bi-box-seam"
                                         />
                                         <div className="flex gap-3">
                                             <button onClick={() => saveEdit(p.id)} className="btn-text-action">Save</button>

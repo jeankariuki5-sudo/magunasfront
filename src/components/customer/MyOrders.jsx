@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import DashboardLayout from '../DashboardLayout'
+import PaymentPanel from './PaymentPanel'
 
 const statusBadge = {
     placed: 'badge-pending',
@@ -9,6 +10,12 @@ const statusBadge = {
     ready_for_pickup: 'badge-reviewed',
     delivered: 'badge-resolved',
     cancelled: 'badge-inactive',
+}
+
+const paymentBadge = {
+    success: 'badge-resolved',
+    pending: 'badge-pending',
+    failed: 'badge-inactive',
 }
 
 const statusLabel = (s) => s.replace(/_/g, ' ')
@@ -22,6 +29,8 @@ const MyOrders = () => {
     const [error, setError] = useState('')
     const [expandedId, setExpandedId] = useState(null)
     const [cancellingId, setCancellingId] = useState(null)
+    const [payments, setPayments] = useState({}) // orderId -> payment status data
+    const [payingId, setPayingId] = useState(null)
 
     const fetchOrders = async () => {
         setLoading(true)
@@ -38,6 +47,23 @@ const MyOrders = () => {
     }
 
     useEffect(() => { fetchOrders() }, [statusFilter])
+
+    const fetchPaymentStatus = async (orderId) => {
+        try {
+            const res = await api.get(`payments/payment_status/${orderId}/`)
+            setPayments((prev) => ({ ...prev, [orderId]: res.data }))
+        } catch {
+            // silently skip - payment status is a nice-to-have, not critical
+        }
+    }
+
+    const handleExpand = (order) => {
+        const willExpand = expandedId !== order.id
+        setExpandedId(willExpand ? order.id : null)
+        if (willExpand && order.status !== 'cancelled' && !payments[order.id]) {
+            fetchPaymentStatus(order.id)
+        }
+    }
 
     const handleCancel = async (orderId) => {
         if (!window.confirm('Cancel this order?')) return
@@ -80,11 +106,13 @@ const MyOrders = () => {
                     <div className="space-y-3">
                         {orders.map((order) => {
                             const expanded = expandedId === order.id
+                            const payment = payments[order.id]
+                            const unpaid = payment && ['no payment initiated', 'failed'].includes(payment.payment_status)
                             return (
                                 <div key={order.id} className="card">
                                     <div
                                         className="flex justify-between items-start cursor-pointer"
-                                        onClick={() => setExpandedId(expanded ? null : order.id)}
+                                        onClick={() => handleExpand(order)}
                                     >
                                         <div>
                                             <p className="font-semibold text-brand-black dark:text-white">
@@ -119,14 +147,44 @@ const MyOrders = () => {
                                             {order.fulfillment_type === 'delivery' && order.delivery_address && (
                                                 <p className="text-xs text-faint mb-3">Deliver to: {order.delivery_address}</p>
                                             )}
-                                            {canCancel(order.status) && (
-                                                <button
-                                                    onClick={() => handleCancel(order.id)}
-                                                    disabled={cancellingId === order.id}
-                                                    className="btn-text-danger"
-                                                >
-                                                    {cancellingId === order.id ? 'Cancelling...' : 'Cancel order'}
-                                                </button>
+
+                                            {order.status !== 'cancelled' && payment && (
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className="text-xs text-muted">Payment:</span>
+                                                    <span className={paymentBadge[payment.payment_status] || 'badge-inactive'}>
+                                                        {payment.payment_status === 'no payment initiated' ? 'unpaid' : payment.payment_status}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex flex-wrap gap-3 items-center">
+                                                {unpaid && payingId !== order.id && (
+                                                    <button onClick={() => setPayingId(order.id)} className="btn-primary text-xs px-4 py-1.5">
+                                                        {payment.payment_status === 'failed' ? 'Pay again' : 'Pay now'}
+                                                    </button>
+                                                )}
+                                                {canCancel(order.status) && (
+                                                    <button
+                                                        onClick={() => handleCancel(order.id)}
+                                                        disabled={cancellingId === order.id}
+                                                        className="btn-text-danger"
+                                                    >
+                                                        {cancellingId === order.id ? 'Cancelling...' : 'Cancel order'}
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {payingId === order.id && (
+                                                <div className="mt-3">
+                                                    <PaymentPanel
+                                                        orderId={order.id}
+                                                        amount={order.total_amount}
+                                                        onPaid={() => {
+                                                            setPayingId(null)
+                                                            fetchPaymentStatus(order.id)
+                                                        }}
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                     )}

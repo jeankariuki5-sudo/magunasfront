@@ -44,6 +44,9 @@ import Checkout from './components/customer/Checkout'
 import MyOrders from './components/customer/MyOrders'
 
 import AllOrders from './components/admin/AllOrders'
+import AllPayments from './components/admin/AllPayments'
+import AdminAnalytics from './components/admin/AdminAnalytics'
+import BranchAnalytics from './components/branchmanager/BranchAnalytics'
 
 function App() {
   return (
@@ -103,6 +106,7 @@ function App() {
             <Route path='/branch-delivery-zones' element={<ProtectedRoute allowedRoles={['branch_manager']}><DeliveryZones /></ProtectedRoute>} />
             <Route path='/branch-products' element={<ProtectedRoute allowedRoles={['branch_manager']}><MyBranchProducts /></ProtectedRoute>} />
             <Route path='/branch-orders' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchOrders /></ProtectedRoute>} />
+            <Route path='/branch-analytics' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchAnalytics /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path='/admin/users' element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
@@ -116,6 +120,8 @@ function App() {
             <Route path='/admin/products' element={<ProtectedRoute allowedRoles={['admin']}><ProductManager /></ProtectedRoute>} />
             <Route path='/admin/branch-products' element={<ProtectedRoute allowedRoles={['admin']}><BranchProductManager /></ProtectedRoute>} />
             <Route path='/admin/orders' element={<ProtectedRoute allowedRoles={['admin']}><AllOrders /></ProtectedRoute>} />
+            <Route path='/admin/payments' element={<ProtectedRoute allowedRoles={['admin']}><AllPayments /></ProtectedRoute>} />
+            <Route path='/admin/analytics' element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalytics /></ProtectedRoute>} />
 
             <Route path='*' element={<NotFound />} />
           </Routes>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/api'
 import { CartContext } from '../context/CartContext'
 import DashboardLayout from '../DashboardLayout'
+import PaymentPanel from './PaymentPanel'
 
 const Checkout = () => {
     const { cart, refreshCart } = useContext(CartContext)
@@ -16,6 +17,7 @@ const Checkout = () => {
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
     const [placedOrder, setPlacedOrder] = useState(null)
+    const [paid, setPaid] = useState(false)
 
     const branchId = cart.branch?.id
 
@@ -66,18 +68,36 @@ const Checkout = () => {
     if (placedOrder) {
         return (
             <DashboardLayout title="Order Placed">
-                <div className="max-w-md mx-auto card text-center py-10">
-                    <i className="bi bi-check-circle text-4xl text-brand-green-deep dark:text-brand-green mb-3" />
-                    <h2 className="section-title">Order #{placedOrder.id} placed!</h2>
-                    <p className="text-sm text-muted mb-1">{placedOrder.branch}</p>
-                    <p className="text-sm text-muted mb-4 capitalize">{placedOrder.fulfillment_type}</p>
-                    <p className="text-2xl font-display font-semibold text-brand-black dark:text-white mb-6">
-                        KES {placedOrder.total_amount}
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                        <Link to="/orders/my" className="btn-primary">View My Orders</Link>
-                        <Link to="/shop" className="btn-ghost">Continue Shopping</Link>
+                <div className="max-w-md mx-auto space-y-4">
+                    <div className="card text-center py-8">
+                        <i className="bi bi-check-circle text-4xl text-brand-green-deep dark:text-brand-green mb-3" />
+                        <h2 className="section-title">Order #{placedOrder.id} placed!</h2>
+                        <p className="text-sm text-muted mb-1">{placedOrder.branch}</p>
+                        <p className="text-sm text-muted mb-4 capitalize">{placedOrder.fulfillment_type}</p>
+                        <p className="text-2xl font-display font-semibold text-brand-black dark:text-white">
+                            KES {placedOrder.total_amount}
+                        </p>
                     </div>
+
+                    {!paid ? (
+                        <PaymentPanel
+                            orderId={placedOrder.id}
+                            amount={placedOrder.total_amount}
+                            onPaid={() => setPaid(true)}
+                        />
+                    ) : (
+                        <div className="flex gap-3 justify-center">
+                            <Link to="/orders/my" className="btn-primary">View My Orders</Link>
+                            <Link to="/shop" className="btn-ghost">Continue Shopping</Link>
+                        </div>
+                    )}
+
+                    {!paid && (
+                        <p className="text-xs text-faint text-center">
+                            Not ready to pay? Your order is saved — you can pay anytime from{' '}
+                            <Link to="/orders/my" className="link-accent">My Orders</Link>.
+                        </p>
+                    )}
                 </div>
             </DashboardLayout>
         )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import DashboardLayout from '../DashboardLayout'
+import ImageUpload from '../ImageUpload'
 
 const CategoryManager = () => {
     const [categories, setCategories] = useState([])
@@ -100,12 +101,13 @@ const CategoryManager = () => {
                             value={newName} onChange={(e) => setNewName(e.target.value)}
                             className="input-field mb-3"
                         />
-                        <input
-                            type="file" accept="image/*"
-                            onChange={(e) => setNewImage(e.target.files[0])}
-                            className="block text-sm mb-3"
+                        <ImageUpload
+                            existingUrl={null}
+                            onChange={setNewImage}
+                            label="Category image"
+                            icon="bi-image"
                         />
-                        <button type="submit" className="btn-primary">Create Category</button>
+                        <button type="submit" className="btn-primary mt-3">Create Category</button>
                     </form>
                 )}
 
@@ -122,10 +124,11 @@ const CategoryManager = () => {
                                             onChange={(e) => setEditName(e.target.value)}
                                             className="input-field-sm w-full"
                                         />
-                                        <input
-                                            type="file" accept="image/*"
-                                            onChange={(e) => setEditImage(e.target.files[0])}
-                                            className="block text-sm"
+                                        <ImageUpload
+                                            existingUrl={c.image}
+                                            onChange={setEditImage}
+                                            label="Category image"
+                                            icon="bi-image"
                                         />
                                         <div className="flex gap-3">
                                             <button onClick={() => saveEdit(c.id)} className="btn-text-action">Save</button>
