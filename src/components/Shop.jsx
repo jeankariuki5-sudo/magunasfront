@@ -151,7 +151,15 @@ const Shop = () => {
                                     )}
                                     <p className="text-sm font-semibold text-brand-black dark:text-white mb-1">{p.product_name}</p>
                                     <p className="text-xs text-faint mb-2">{p.category}</p>
-                                    <p className="text-sm font-semibold link-accent mb-3">KES {p.price}</p>
+                                    {p.on_promotion ? (
+                                        <p className="text-sm font-semibold mb-3">
+                                            <span className="line-through text-faint mr-1">KES {p.original_price}</span>
+                                            <span className="link-accent">KES {p.price}</span>
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm font-semibold link-accent mb-3">KES {p.price}</p>
+                                    )}
+                                    {p.on_promotion && <span className="badge-active mb-2 inline-block">On promo</span>}
                                     {!p.in_stock && <span className="badge-inactive mb-2 inline-block">Out of stock</span>}
                                     <button
                                         onClick={() => handleAddToCart(p)}

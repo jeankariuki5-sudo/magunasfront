@@ -14,6 +14,8 @@ import NotAuthorised from './components/NotAuthorised'
 import NotFound from './components/NotFound'
 import NearestBranchFinder from './components/NearestBranchFinder'
 import Shop from './components/Shop'
+import PromotionManager from './components/PromotionManager'
+import CustomerLoyaltyLookup from './components/CustomerLoyaltyLookup'
 
 import AdminDashboard from './components/admin/AdminDashboard'
 import CreateBranchManager from './components/admin/CreateBranchManager'
@@ -42,6 +44,7 @@ import MyFeedback from './components/customer/MyFeedback'
 import Cart from './components/customer/Cart'
 import Checkout from './components/customer/Checkout'
 import MyOrders from './components/customer/MyOrders'
+import Loyalty from './components/customer/Loyalty'
 
 import AllOrders from './components/admin/AllOrders'
 import AllPayments from './components/admin/AllPayments'
@@ -98,6 +101,7 @@ function App() {
             <Route path='/cart' element={<ProtectedRoute allowedRoles={['customer']}><Cart /></ProtectedRoute>} />
             <Route path='/checkout' element={<ProtectedRoute allowedRoles={['customer']}><Checkout /></ProtectedRoute>} />
             <Route path='/orders/my' element={<ProtectedRoute allowedRoles={['customer']}><MyOrders /></ProtectedRoute>} />
+            <Route path='/rewards' element={<ProtectedRoute allowedRoles={['customer']}><Loyalty /></ProtectedRoute>} />
 
             {/* Branch manager */}
             <Route path='/branch-profile' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchManagerProfile /></ProtectedRoute>} />
@@ -107,6 +111,8 @@ function App() {
             <Route path='/branch-products' element={<ProtectedRoute allowedRoles={['branch_manager']}><MyBranchProducts /></ProtectedRoute>} />
             <Route path='/branch-orders' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchOrders /></ProtectedRoute>} />
             <Route path='/branch-analytics' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchAnalytics /></ProtectedRoute>} />
+            <Route path='/branch-promotions' element={<ProtectedRoute allowedRoles={['branch_manager']}><PromotionManager /></ProtectedRoute>} />
+            <Route path='/branch-loyalty-lookup' element={<ProtectedRoute allowedRoles={['branch_manager']}><CustomerLoyaltyLookup /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path='/admin/users' element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
@@ -122,6 +128,8 @@ function App() {
             <Route path='/admin/orders' element={<ProtectedRoute allowedRoles={['admin']}><AllOrders /></ProtectedRoute>} />
             <Route path='/admin/payments' element={<ProtectedRoute allowedRoles={['admin']}><AllPayments /></ProtectedRoute>} />
             <Route path='/admin/analytics' element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalytics /></ProtectedRoute>} />
+            <Route path='/admin/promotions' element={<ProtectedRoute allowedRoles={['admin']}><PromotionManager /></ProtectedRoute>} />
+            <Route path='/admin/loyalty-lookup' element={<ProtectedRoute allowedRoles={['admin']}><CustomerLoyaltyLookup /></ProtectedRoute>} />
 
             <Route path='*' element={<NotFound />} />
           </Routes>

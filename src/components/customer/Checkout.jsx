@@ -19,7 +19,16 @@ const Checkout = () => {
     const [placedOrder, setPlacedOrder] = useState(null)
     const [paid, setPaid] = useState(false)
 
+    const [pointsBalance, setPointsBalance] = useState(0)
+    const [pointsToRedeem, setPointsToRedeem] = useState('')
+
     const branchId = cart.branch?.id
+
+    useEffect(() => {
+        api.get('loyalty/my_account/')
+            .then((res) => setPointsBalance(res.data.points_balance))
+            .catch(() => {}) // non-critical - redemption section just won't offer points
+    }, [])
 
     // Only fetch zones once the customer actually picks delivery -
     // no point loading them upfront for a pickup order.
@@ -34,7 +43,13 @@ const Checkout = () => {
 
     const selectedZone = zones.find((z) => String(z.id) === String(zoneId))
     const deliveryFee = fulfillmentType === 'delivery' && selectedZone ? Number(selectedZone.delivery_fee) : 0
-    const grandTotal = Number(cart.total) + deliveryFee
+    const preDiscountTotal = Number(cart.total) + deliveryFee
+
+    // 1 point = KES 1. Can't redeem more points than you have, and can't
+    // redeem more than the order is actually worth - mirrors the backend check.
+    const maxRedeemable = Math.min(pointsBalance, Math.floor(preDiscountTotal))
+    const redeemedPoints = Math.min(Number(pointsToRedeem) || 0, maxRedeemable)
+    const grandTotal = preDiscountTotal - redeemedPoints
 
     const handlePlaceOrder = async () => {
         setError('')
@@ -54,6 +69,9 @@ const Checkout = () => {
             if (fulfillmentType === 'delivery') {
                 payload.delivery_zone_id = zoneId
                 payload.delivery_address = address
+            }
+            if (redeemedPoints > 0) {
+                payload.points_to_redeem = redeemedPoints
             }
             const res = await api.post('orders/place_order/', payload)
             setPlacedOrder(res.data.order)
@@ -77,6 +95,11 @@ const Checkout = () => {
                         <p className="text-2xl font-display font-semibold text-brand-black dark:text-white">
                             KES {placedOrder.total_amount}
                         </p>
+                        {Number(placedOrder.points_redeemed) > 0 && (
+                            <p className="text-xs text-muted mt-1">
+                                {placedOrder.points_redeemed} points redeemed (KES {placedOrder.points_discount} off)
+                            </p>
+                        )}
                     </div>
 
                     {!paid ? (
@@ -173,6 +196,32 @@ const Checkout = () => {
                     </div>
                 )}
 
+                {pointsBalance > 0 && (
+                    <div className="card">
+                        <div className="flex justify-between items-center mb-2">
+                            <p className="section-title text-sm mb-0">Redeem points</p>
+                            <span className="text-xs text-muted">{pointsBalance} available</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <input
+                                type="number" min="0" max={maxRedeemable}
+                                placeholder="0"
+                                value={pointsToRedeem}
+                                onChange={(e) => setPointsToRedeem(e.target.value)}
+                                className="input-field-sm flex-1"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setPointsToRedeem(String(maxRedeemable))}
+                                className="btn-ghost text-xs whitespace-nowrap"
+                            >
+                                Use max ({maxRedeemable})
+                            </button>
+                        </div>
+                        <p className="text-xs text-faint mt-1">1 point = KES 1 off this order</p>
+                    </div>
+                )}
+
                 <div className="card">
                     <p className="section-title text-sm">Order summary</p>
                     <div className="space-y-1 text-sm">
@@ -186,6 +235,12 @@ const Checkout = () => {
                             <div className="flex justify-between text-brand-black/70 dark:text-white/70">
                                 <span>Delivery fee</span>
                                 <span>KES {deliveryFee.toFixed(2)}</span>
+                            </div>
+                        )}
+                        {redeemedPoints > 0 && (
+                            <div className="flex justify-between text-brand-green-deep dark:text-brand-green">
+                                <span>Points redeemed ({redeemedPoints})</span>
+                                <span>-KES {redeemedPoints.toFixed(2)}</span>
                             </div>
                         )}
                     </div>
