@@ -85,6 +85,16 @@ const BranchList = () => {
         }
     }
 
+    const handleUnassign = async (b) => {
+        if (!window.confirm(`Unassign ${b.branch_manager} from "${b.branch_name}"?`)) return
+        try {
+            await api.post(`branches/unassign_manager/${b.id}/`)
+            fetchBranches()
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to unassign manager')
+        }
+    }
+
     const handleDelete = async (b) => {
         if (!window.confirm(`Permanently delete "${b.branch_name}"? This cannot be undone.`)) return
         try {
@@ -183,6 +193,11 @@ const BranchList = () => {
                                             <button onClick={() => startAssign(b)} className="btn-text-muted">
                                                 {b.branch_manager ? 'Reassign Manager' : 'Assign Manager'}
                                             </button>
+                                            {b.branch_manager && (
+                                                <button onClick={() => handleUnassign(b)} className="btn-text-danger">
+                                                    Unassign Manager
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => setExpandedZonesId(expandedZonesId === b.id ? null : b.id)}
                                                 className="btn-text-muted"

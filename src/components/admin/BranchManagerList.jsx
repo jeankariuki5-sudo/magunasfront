@@ -31,8 +31,7 @@ const BranchManagerList = () => {
                 ...m,
                 assignedBranch: assignmentById[m.id]?.branch || null,
             }))
-            setManagers(merged)
-        } catch (err) {
+            setManagers(merged)        } catch (err) {
             setError(err.response?.data?.error || 'Failed to load branch managers')
         } finally {
             setLoading(false)
@@ -93,6 +92,18 @@ const BranchManagerList = () => {
             fetchManagers()
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to assign branch')
+        }
+    }
+
+    const handleUnassign = async (m) => {
+        const branch = branches.find((b) => b.branch_name === m.assignedBranch)
+        if (!branch) return
+        if (!window.confirm(`Unassign ${m.username} from "${branch.branch_name}"?`)) return
+        try {
+            await api.post(`branches/unassign_manager/${branch.id}/`)
+            fetchManagers()
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to unassign manager')
         }
     }
 
@@ -211,6 +222,11 @@ const BranchManagerList = () => {
                                             <button onClick={() => startAssign(m)} className="btn-text-muted">
                                                 {m.assignedBranch ? 'Reassign Branch' : 'Assign Branch'}
                                             </button>
+                                            {m.assignedBranch && (
+                                                <button onClick={() => handleUnassign(m)} className="btn-text-danger">
+                                                    Unassign
+                                                </button>
+                                            )}
                                             <button onClick={() => handleDelete(m)} className="btn-text-danger">Delete</button>
                                         </div>
                                     </>
