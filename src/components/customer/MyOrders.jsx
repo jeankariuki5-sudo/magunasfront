@@ -139,7 +139,7 @@ const MyOrders = () => {
                                                 ))}
                                                 {Number(order.delivery_fee) > 0 && (
                                                     <div className="flex justify-between text-brand-black/70 dark:text-white/70">
-                                                        <span>Delivery fee ({order.delivery_zone})</span>
+                                                        <span>Delivery fee</span>
                                                         <span>KES {order.delivery_fee}</span>
                                                     </div>
                                                 )}

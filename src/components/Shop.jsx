@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import api from './api/api'
 import DashboardLayout from './DashboardLayout'
@@ -8,6 +8,7 @@ import { CartContext } from './context/CartContext'
 const Shop = () => {
     const [searchParams, setSearchParams] = useSearchParams()
     const branchId = searchParams.get('branch')
+    const isAutoPicked = searchParams.get('auto') === '1'
     const navigate = useNavigate()
     const { user } = useContext(AuthContext)
     const { cart, addToCart } = useContext(CartContext)
@@ -16,19 +17,64 @@ const Shop = () => {
     const [products, setProducts] = useState([])
     const [categories, setCategories] = useState([])
     const [search, setSearch] = useState('')
-    const [categoryFilter, setCategoryFilter] = useState('')
+    // Lazy-initialized once from the URL so a category picked on the landing
+    // page carousel survives the branch auto-detect redirect (which replaces
+    // the URL's other params) - local state isn't touched by that swap.
+    const [categoryFilter, setCategoryFilter] = useState(() => searchParams.get('category') || '')
     const [inStockOnly, setInStockOnly] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [addingId, setAddingId] = useState(null)
     const [addedId, setAddedId] = useState(null)
 
+    // Detecting location + resolving the nearest branch, tried once per visit.
+    // Runs only when arriving with no ?branch= at all - once the customer has
+    // picked one (auto or manual), "Change branch" clears the param but we
+    // don't silently override that choice again with a fresh auto-pick.
+    const [autoDetecting, setAutoDetecting] = useState(!branchId)
+    const autoAttempted = useRef(false)
+
     useEffect(() => {
-        if (!branchId) {
-            api.get('branches/branch_list/').then((res) => setBranches(res.data)).catch(() => {})
-        } else {
-            api.get('products/list_categories/').then((res) => setCategories(res.data)).catch(() => {})
+        if (branchId) return
+        // Guards against firing a second geolocation request - notably the
+        // one React 18 StrictMode triggers in dev (effect -> fake cleanup ->
+        // effect again, on the same mount). Deliberately NOT setting
+        // autoDetecting here: doing so flashed the manual branch list for a
+        // frame before the first request's callback redirected us away.
+        // The original in-flight request is left to decide the outcome.
+        if (autoAttempted.current) return
+        autoAttempted.current = true
+
+        if (!navigator.geolocation) {
+            setAutoDetecting(false)
+            return
         }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords
+                api.get('branches/nearest/', { params: { lat: latitude, lng: longitude } })
+                    .then((res) => {
+                        setSearchParams({ branch: res.data.nearest_branch.id, auto: '1' })
+                    })
+                    .catch(() => setAutoDetecting(false))
+            },
+            () => setAutoDetecting(false), // permission denied - fall back to manual list
+            { timeout: 8000 }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        )
+    }, [branchId])
+
+    // Always loaded (not just for the manual picker) so the branch name
+    // resolves for display even when a branch was auto-selected via
+    // geolocation rather than clicked from this list.
+    useEffect(() => {
+        api.get('branches/branch_list/').then((res) => setBranches(res.data)).catch(() => {})
+    }, [])
+
+    useEffect(() => {
+        if (!branchId) return
+        api.get('products/list_categories/').then((res) => setCategories(res.data)).catch(() => {})
     }, [branchId])
 
     useEffect(() => {
@@ -87,31 +133,43 @@ const Shop = () => {
             </div>
 
             {!branchId ? (
-                <>
-                    <h1 className="page-title text-2xl mb-2">Choose your branch</h1>
-                    <p className="text-muted mb-6">Prices and stock vary by branch.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {branches.map((b) => (
-                            <button
-                                key={b.id}
-                                onClick={() => setSearchParams({ branch: b.id })}
-                                className="card text-left hover:border-brand-green border border-transparent transition"
-                            >
-                                <p className="font-semibold text-brand-black dark:text-white">{b.branch_name}</p>
-                                <p className="text-sm text-muted">{b.address}</p>
-                            </button>
-                        ))}
+                autoDetecting ? (
+                    <div className="text-center py-16">
+                        <i className="bi bi-geo-alt text-3xl text-brand-green-deep dark:text-brand-green mb-3 block" />
+                        <p className="text-muted">Finding a branch near you...</p>
                     </div>
-                    {branches.length === 0 && <p className="text-sm text-muted">Loading branches...</p>}
-                </>
+                ) : (
+                    <>
+                        <h1 className="page-title text-2xl mb-2">Choose your branch</h1>
+                        <p className="text-muted mb-6">Prices and stock vary by branch.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {branches.map((b) => (
+                                <button
+                                    key={b.id}
+                                    onClick={() => setSearchParams({ branch: b.id })}
+                                    className="card text-left hover:border-brand-green border border-transparent transition"
+                                >
+                                    <p className="font-semibold text-brand-black dark:text-white">{b.branch_name}</p>
+                                    <p className="text-sm text-muted">{b.address}</p>
+                                </button>
+                            ))}
+                        </div>
+                        {branches.length === 0 && <p className="text-sm text-muted">Loading branches...</p>}
+                    </>
+                )
             ) : (
                 <>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center mb-1">
                         <h1 className="page-title text-xl">{selectedBranchName || 'Shop'}</h1>
                         <button onClick={() => setSearchParams({})} className="text-xs link-muted">Change branch</button>
                     </div>
+                    {isAutoPicked && (
+                        <p className="text-xs text-faint mb-2">
+                            <i className="bi bi-geo-alt" /> Picked based on your location
+                        </p>
+                    )}
 
-                    <div className="flex gap-3 mb-6 flex-wrap items-center">
+                    <div className="flex gap-3 mb-6 mt-3 flex-wrap items-center">
                         <input
                             type="text" placeholder="Search products..."
                             value={search} onChange={(e) => setSearch(e.target.value)}

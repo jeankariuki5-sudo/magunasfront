@@ -20,7 +20,6 @@ const navByRole = {
         { to: '/branch-analytics', label: 'Analytics', icon: 'bi-bar-chart' },
         { to: '/branch-promotions', label: 'Promotions', icon: 'bi-tag' },
         { to: '/branch-loyalty-lookup', label: 'Customer Points', icon: 'bi-award' },
-        { to: '/branch-delivery-zones', label: 'Delivery Zones', icon: 'bi-geo-alt' },
         { to: '/branch-feedback', label: 'Branch Feedback', icon: 'bi-chat-left-text' },
         { to: '/branch-feedback/submit', label: 'Message Admin', icon: 'bi-send' },
     ],

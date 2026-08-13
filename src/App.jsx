@@ -33,7 +33,6 @@ import BranchDashboard from './components/branchmanager/BranchDashboard'
 import BranchManagerProfile from './components/branchmanager/Profile'
 import ManagerSubmitFeedback from './components/branchmanager/ManagerSubmitFeedback'
 import BranchFeedback from './components/branchmanager/BranchFeedback'
-import DeliveryZones from './components/branchmanager/DeliveryZones'
 import MyBranchProducts from './components/branchmanager/MyBranchProducts'
 import BranchOrders from './components/branchmanager/BranchOrders'
 
@@ -107,7 +106,6 @@ function App() {
             <Route path='/branch-profile' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchManagerProfile /></ProtectedRoute>} />
             <Route path='/branch-feedback/submit' element={<ProtectedRoute allowedRoles={['branch_manager']}><ManagerSubmitFeedback /></ProtectedRoute>} />
             <Route path='/branch-feedback' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchFeedback /></ProtectedRoute>} />
-            <Route path='/branch-delivery-zones' element={<ProtectedRoute allowedRoles={['branch_manager']}><DeliveryZones /></ProtectedRoute>} />
             <Route path='/branch-products' element={<ProtectedRoute allowedRoles={['branch_manager']}><MyBranchProducts /></ProtectedRoute>} />
             <Route path='/branch-orders' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchOrders /></ProtectedRoute>} />
             <Route path='/branch-analytics' element={<ProtectedRoute allowedRoles={['branch_manager']}><BranchAnalytics /></ProtectedRoute>} />

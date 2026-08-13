@@ -141,13 +141,22 @@ const AllOrders = () => {
                                                 ))}
                                                 {Number(order.delivery_fee) > 0 && (
                                                     <div className="flex justify-between text-brand-black/70 dark:text-white/70">
-                                                        <span>Delivery fee ({order.delivery_zone})</span>
+                                                        <span>Delivery fee</span>
                                                         <span>KES {order.delivery_fee}</span>
                                                     </div>
                                                 )}
                                             </div>
                                             {order.fulfillment_type === 'delivery' && order.delivery_address && (
-                                                <p className="text-xs text-faint mb-3">Deliver to: {order.delivery_address}</p>
+                                                <p className="text-xs text-faint mb-1">Deliver to: {order.delivery_address}</p>
+                                            )}
+                                            {order.fulfillment_type === 'delivery' && order.delivery_latitude && order.delivery_longitude && (
+                                                <a
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${order.delivery_latitude},${order.delivery_longitude}`}
+                                                    target="_blank" rel="noopener noreferrer"
+                                                    className="text-xs link-accent mb-3 inline-block"
+                                                >
+                                                    View delivery location on map ↗
+                                                </a>
                                             )}
 
                                             {options.length > 0 ? (

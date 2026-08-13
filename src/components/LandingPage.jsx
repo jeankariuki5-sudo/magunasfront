@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
 import ThemeToggle from './context/ThemeToggle'
+import CategoryCarousel from './CategoryCarousel'
 
 const LandingPage = () => {
   return (
@@ -18,7 +19,7 @@ const LandingPage = () => {
         </div>
       </header>
 
-      <main className="flex flex-col items-center text-center px-6 pt-16 pb-24">
+      <main className="flex flex-col items-center text-center px-6 pt-16 pb-8">
         <Logo size="lg" />
 
         <p className="mt-8 max-w-xl text-lg text-brand-black/70 dark:text-white/70 font-body">
@@ -45,6 +46,8 @@ const LandingPage = () => {
           <i className="bi bi-geo-alt" /> Find your nearest branch
         </Link>
       </main>
+
+      <CategoryCarousel />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/api'
 import DashboardLayout from '../DashboardLayout'
-import DeliveryZoneManager from '../DeliveryZoneManager'
 import LocationPicker from '../LocationPicker'
 
 const emptyEdit = { branch_name: '', phone_number: '', is_active: true }
@@ -17,7 +16,6 @@ const BranchList = () => {
     const [editLocation, setEditLocation] = useState(null)
     const [assigningId, setAssigningId] = useState(null)
     const [managerToAssign, setManagerToAssign] = useState('')
-    const [expandedZonesId, setExpandedZonesId] = useState(null)
 
     const fetchBranches = async () => {
         setLoading(true)
@@ -41,7 +39,6 @@ const BranchList = () => {
     const startEdit = (b) => {
         setEditingId(b.id)
         setAssigningId(null)
-        setExpandedZonesId(null)
         setEditForm({
             branch_name: b.branch_name,
             phone_number: b.phone_number,
@@ -69,7 +66,6 @@ const BranchList = () => {
     const startAssign = (b) => {
         setAssigningId(b.id)
         setEditingId(null)
-        setExpandedZonesId(null)
         const current = managers.find((m) => m.username === b.branch_manager)
         setManagerToAssign(current ? String(current.id) : '')
     }
@@ -198,20 +194,8 @@ const BranchList = () => {
                                                     Unassign Manager
                                                 </button>
                                             )}
-                                            <button
-                                                onClick={() => setExpandedZonesId(expandedZonesId === b.id ? null : b.id)}
-                                                className="btn-text-muted"
-                                            >
-                                                {expandedZonesId === b.id ? 'Hide Delivery Zones' : 'Delivery Zones'}
-                                            </button>
                                             <button onClick={() => handleDelete(b)} className="btn-text-danger">Delete</button>
                                         </div>
-
-                                        {expandedZonesId === b.id && (
-                                            <div className="mt-4">
-                                                <DeliveryZoneManager branchId={b.id} branchName={b.branch_name} />
-                                            </div>
-                                        )}
                                     </>
                                 )}
                             </div>

@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/api'
 import { CartContext } from '../context/CartContext'
 import DashboardLayout from '../DashboardLayout'
+import LocationPicker from '../LocationPicker'
 import PaymentPanel from './PaymentPanel'
 
 const Checkout = () => {
@@ -10,10 +11,11 @@ const Checkout = () => {
     const navigate = useNavigate()
 
     const [fulfillmentType, setFulfillmentType] = useState('pickup')
-    const [zones, setZones] = useState([])
-    const [zoneId, setZoneId] = useState('')
-    const [address, setAddress] = useState('')
-    const [zonesLoading, setZonesLoading] = useState(false)
+    const [deliveryLocation, setDeliveryLocation] = useState(null) // { address, lat, lng }
+    const [deliveryFee, setDeliveryFee] = useState(0)
+    const [distanceKm, setDistanceKm] = useState(null)
+    const [feeLoading, setFeeLoading] = useState(false)
+    const [feeError, setFeeError] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
     const [placedOrder, setPlacedOrder] = useState(null)
@@ -23,6 +25,7 @@ const Checkout = () => {
     const [pointsToRedeem, setPointsToRedeem] = useState('')
 
     const branchId = cart.branch?.id
+    const feeRequestId = useRef(0)
 
     useEffect(() => {
         api.get('loyalty/my_account/')
@@ -30,20 +33,44 @@ const Checkout = () => {
             .catch(() => {}) // non-critical - redemption section just won't offer points
     }, [])
 
-    // Only fetch zones once the customer actually picks delivery -
-    // no point loading them upfront for a pickup order.
+    // Quote the delivery fee (KES 150 within 10km, +KES 50 per extra 10km)
+    // any time the customer moves the pin. Debounced a little since manual
+    // lat/lng entry can fire a change per keystroke.
     useEffect(() => {
-        if (fulfillmentType !== 'delivery' || !branchId) return
-        setZonesLoading(true)
-        api.get(`branches/delivery_zones/${branchId}/`)
-            .then((res) => setZones(res.data.delivery_zones || []))
-            .catch(() => setError('Could not load delivery zones for this branch'))
-            .finally(() => setZonesLoading(false))
-    }, [fulfillmentType, branchId])
+        if (fulfillmentType !== 'delivery' || !branchId || !deliveryLocation?.lat || !deliveryLocation?.lng) {
+            setDeliveryFee(0)
+            setDistanceKm(null)
+            return
+        }
 
-    const selectedZone = zones.find((z) => String(z.id) === String(zoneId))
-    const deliveryFee = fulfillmentType === 'delivery' && selectedZone ? Number(selectedZone.delivery_fee) : 0
-    const preDiscountTotal = Number(cart.total) + deliveryFee
+        const requestId = ++feeRequestId.current
+        setFeeLoading(true)
+        setFeeError('')
+
+        const timer = setTimeout(() => {
+            api.get('branches/delivery_fee/', {
+                params: { branch_id: branchId, lat: deliveryLocation.lat, lng: deliveryLocation.lng },
+            })
+                .then((res) => {
+                    if (requestId !== feeRequestId.current) return // a newer request superseded this one
+                    setDeliveryFee(Number(res.data.delivery_fee))
+                    setDistanceKm(res.data.distance_km)
+                })
+                .catch((err) => {
+                    if (requestId !== feeRequestId.current) return
+                    setFeeError(err.response?.data?.error || 'Could not calculate delivery fee for this location')
+                    setDeliveryFee(0)
+                    setDistanceKm(null)
+                })
+                .finally(() => {
+                    if (requestId === feeRequestId.current) setFeeLoading(false)
+                })
+        }, 400)
+
+        return () => clearTimeout(timer)
+    }, [fulfillmentType, branchId, deliveryLocation?.lat, deliveryLocation?.lng])
+
+    const preDiscountTotal = Number(cart.total) + (fulfillmentType === 'delivery' ? deliveryFee : 0)
 
     // 1 point = KES 1. Can't redeem more points than you have, and can't
     // redeem more than the order is actually worth - mirrors the backend check.
@@ -54,12 +81,16 @@ const Checkout = () => {
     const handlePlaceOrder = async () => {
         setError('')
 
-        if (fulfillmentType === 'delivery' && !zoneId) {
-            setError('Please select a delivery zone')
+        if (fulfillmentType === 'delivery' && (!deliveryLocation?.lat || !deliveryLocation?.lng)) {
+            setError('Please pin your delivery location on the map')
             return
         }
-        if (fulfillmentType === 'delivery' && !address.trim()) {
+        if (fulfillmentType === 'delivery' && !deliveryLocation?.address?.trim()) {
             setError('Please enter a delivery address')
+            return
+        }
+        if (fulfillmentType === 'delivery' && feeLoading) {
+            setError('Still calculating your delivery fee - one moment')
             return
         }
 
@@ -67,8 +98,9 @@ const Checkout = () => {
         try {
             const payload = { fulfillment_type: fulfillmentType }
             if (fulfillmentType === 'delivery') {
-                payload.delivery_zone_id = zoneId
-                payload.delivery_address = address
+                payload.delivery_address = deliveryLocation.address
+                payload.delivery_latitude = deliveryLocation.lat
+                payload.delivery_longitude = deliveryLocation.lng
             }
             if (redeemedPoints > 0) {
                 payload.points_to_redeem = redeemedPoints
@@ -98,6 +130,11 @@ const Checkout = () => {
                         {Number(placedOrder.points_redeemed) > 0 && (
                             <p className="text-xs text-muted mt-1">
                                 {placedOrder.points_redeemed} points redeemed (KES {placedOrder.points_discount} off)
+                            </p>
+                        )}
+                        {placedOrder.delivery_distance_km != null && (
+                            <p className="text-xs text-faint mt-1">
+                                {placedOrder.delivery_distance_km} km from {placedOrder.branch} · KES {placedOrder.delivery_fee} delivery
                             </p>
                         )}
                     </div>
@@ -168,31 +205,22 @@ const Checkout = () => {
                 ) : (
                     <div className="card space-y-3">
                         <div>
-                            <label className="text-sm text-muted block mb-1">Delivery zone</label>
-                            {zonesLoading ? (
-                                <p className="text-sm text-muted">Loading zones...</p>
-                            ) : (
-                                <select value={zoneId} onChange={(e) => setZoneId(e.target.value)} className="select-field">
-                                    <option value="" className="text-black">Select a zone</option>
-                                    {zones.map((z) => (
-                                        <option key={z.id} value={z.id} className="text-black">
-                                            {z.zone_name} — KES {z.delivery_fee}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                            {!zonesLoading && zones.length === 0 && (
-                                <p className="text-xs text-faint mt-1">No delivery zones available for this branch yet.</p>
-                            )}
+                            <label className="text-sm text-muted block mb-1">Delivery location</label>
+                            <LocationPicker value={deliveryLocation} onChange={setDeliveryLocation} height="220px" />
                         </div>
-                        <div>
-                            <label className="text-sm text-muted block mb-1">Delivery address</label>
-                            <textarea
-                                value={address} onChange={(e) => setAddress(e.target.value)} rows={3}
-                                placeholder="Street, building, landmark..."
-                                className="input-field resize-none"
-                            />
-                        </div>
+                        {feeError && <p className="text-xs text-red-500">{feeError}</p>}
+                        {!feeError && deliveryLocation?.lat && (
+                            <p className="text-xs text-faint">
+                                {feeLoading
+                                    ? 'Calculating delivery fee...'
+                                    : distanceKm != null
+                                        ? `${distanceKm} km from ${cart.branch?.branch_name} · KES ${deliveryFee} delivery fee`
+                                        : null}
+                            </p>
+                        )}
+                        <p className="text-xs text-faint">
+                            KES 150 within 10km, +KES 50 for every extra 10km.
+                        </p>
                     </div>
                 )}
 
@@ -231,7 +259,7 @@ const Checkout = () => {
                                 <span>KES {item.subtotal}</span>
                             </div>
                         ))}
-                        {deliveryFee > 0 && (
+                        {fulfillmentType === 'delivery' && deliveryFee > 0 && (
                             <div className="flex justify-between text-brand-black/70 dark:text-white/70">
                                 <span>Delivery fee</span>
                                 <span>KES {deliveryFee.toFixed(2)}</span>
@@ -250,7 +278,11 @@ const Checkout = () => {
                     </div>
                 </div>
 
-                <button onClick={handlePlaceOrder} disabled={submitting} className="btn-primary-block">
+                <button
+                    onClick={handlePlaceOrder}
+                    disabled={submitting || (fulfillmentType === 'delivery' && feeLoading)}
+                    className="btn-primary-block"
+                >
                     {submitting ? 'Placing order...' : 'Place Order'}
                 </button>
                 <p className="text-xs text-faint text-center">Payment via M-Pesa happens after your order is confirmed.</p>
